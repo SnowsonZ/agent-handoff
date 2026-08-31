@@ -25,6 +25,12 @@ Use the $handoff-installer skill to install handoff in this git repository.
 
 普通 `Continue.`、继续编码或交棒请求不会触发安装器。
 
+## 市场页面
+
+- [skills.sh](https://www.skills.sh/snowsonz/agent-handoff/handoff-installer)
+- [ClawHub](https://clawhub.ai/snowsonz/skills/agent-handoff)
+- [GitHub](https://github.com/SnowsonZ/agent-handoff)
+
 ## 安全边界
 
 - 只接受具体 git 仓库作为目标
@@ -41,6 +47,7 @@ Use the $handoff-installer skill to install handoff in this git repository.
 - [服务条款](docs/publish/TERMS.md)
 - [支持](docs/publish/SUPPORT.md)
 - [审核测试用例](docs/publish/TEST_CASES.json)
+- [发布状态](docs/publish/STATUS.md)
 
 ## 许可证
 
