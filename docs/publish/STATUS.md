@@ -6,7 +6,7 @@
 | --- | --- | --- | --- |
 | GitHub | 已发布 | <https://github.com/SnowsonZ/agent-handoff> | `main` 与 `v0.1.1` 已推送 |
 | skills.sh | 已收录 | <https://www.skills.sh/snowsonz/agent-handoff/handoff-installer> | 已用公开仓库完成实际安装验证 |
-| ClawHub | 已发布 | <https://clawhub.ai/snowsonz/skills/agent-handoff> | `0.1.1`、`latest`，市场安全判定为 `clean` |
+| ClawHub | 已发布，安全审计为 Review | <https://clawhub.ai/snowsonz/skills/agent-handoff> | `0.1.1`、`latest`；静态分析未发现可疑模式，未触发恶意软件拦截；agent 行为风险审计要求复核，VirusTotal 结果仍待返回 |
 | OpenAI Plugins Directory | 待身份验证 | <https://platform.openai.com/plugins> | 当前账号须先完成开发者身份验证，门户才允许创建或上传 Plugin |
 
 ## 当前发布标识
