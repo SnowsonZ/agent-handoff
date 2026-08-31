@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Agent Handoff</title>
+  <desc id="desc">Two connected nodes passing a task baton</desc>
+  <rect width="512" height="512" rx="112" fill="#2563EB"/>
+  <circle cx="154" cy="256" r="54" fill="#EFF6FF"/>
+  <circle cx="358" cy="256" r="54" fill="#EFF6FF"/>
+  <path d="M214 232h96l-28-28 28-28 76 80-76 80-28-28 28-28h-96z" fill="#BFDBFE"/>
+  <path d="M140 225h28v62h-28zm204 0h28v62h-28z" fill="#1D4ED8"/>
+</svg>

@@ -1,0 +1,40 @@
+{
+  "name": "agent-handoff",
+  "version": "0.1.1",
+  "description": "Install and update a repository-local handoff protocol for auditable multi-agent task relay.",
+  "author": {
+    "name": "Snowson",
+    "email": "snowsonz@outlook.com",
+    "url": "https://github.com/SnowsonZ"
+  },
+  "homepage": "https://github.com/SnowsonZ/agent-handoff",
+  "repository": "https://github.com/SnowsonZ/agent-handoff",
+  "license": "MIT-0",
+  "keywords": [
+    "handoff",
+    "workflow",
+    "multi-agent"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Agent Handoff",
+    "shortDescription": "Install an auditable repository handoff protocol",
+    "longDescription": "Install, inspect, update, or adopt a repository-local handoff protocol that keeps task state and audit history in git.",
+    "developerName": "Snowson",
+    "category": "Productivity",
+    "capabilities": [
+      "Write"
+    ],
+    "websiteURL": "https://github.com/SnowsonZ/agent-handoff",
+    "privacyPolicyURL": "https://github.com/SnowsonZ/agent-handoff/blob/main/docs/publish/PRIVACY.md",
+    "termsOfServiceURL": "https://github.com/SnowsonZ/agent-handoff/blob/main/docs/publish/TERMS.md",
+    "defaultPrompt": [
+      "Install handoff in this git repository.",
+      "Check the handoff installation status.",
+      "Update the handoff protocol in this repository."
+    ],
+    "brandColor": "#2563EB",
+    "composerIcon": "./assets/logo.svg",
+    "logo": "./assets/logo.svg"
+  }
+}

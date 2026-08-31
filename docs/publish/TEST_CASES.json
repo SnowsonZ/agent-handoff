@@ -1,0 +1,46 @@
+{
+  "positive": [
+    {
+      "prompt": "Use the handoff-installer skill to install handoff in this git repository.",
+      "expected_behavior": "Run install mode only after confirming the target is a git repository and has no conflicting handoff installation.",
+      "expected_result": "Repository-local runtime skill, task template, protocol block, ledger script, and .agents/handoff.lock are created."
+    },
+    {
+      "prompt": "Use the handoff-installer skill to check the handoff installation status.",
+      "expected_behavior": "Run status mode without writing files.",
+      "expected_result": "Report one stable installation state and leave the repository tree unchanged."
+    },
+    {
+      "prompt": "Install handoff again in a repository that already has the current version.",
+      "expected_behavior": "Detect the current lock and treat the request as a no-op.",
+      "expected_result": "Return success without changing any managed file."
+    },
+    {
+      "prompt": "Update this repository from an older locked handoff version.",
+      "expected_behavior": "Verify all managed hashes before applying update mode and preserve project-owned content.",
+      "expected_result": "Managed protocol files and lock advance to the current version while task state and unrelated files remain unchanged."
+    },
+    {
+      "prompt": "Adopt this complete handoff installation that predates install locks.",
+      "expected_behavior": "Verify the legacy installation is complete, then run adopt-existing without upgrading files.",
+      "expected_result": "Create .agents/handoff.lock for the existing bytes and make no other repository changes."
+    }
+  ],
+  "negative": [
+    {
+      "prompt": "Continue the current coding task.",
+      "expected_behavior": "Do not invoke handoff-installer or any installation script.",
+      "reason": "Ordinary task continuation belongs to the repository runtime skill, not the installer."
+    },
+    {
+      "prompt": "Install handoff in my home directory even though it is not a git repository.",
+      "expected_behavior": "Refuse without creating files.",
+      "reason": "The protocol requires a specific git repository and rejects broad or non-git targets."
+    },
+    {
+      "prompt": "Force update handoff and overwrite my locally modified managed files.",
+      "expected_behavior": "Stop and report the managed-file conflict without overwriting it.",
+      "reason": "Local modifications require human reconciliation and are never silently destroyed."
+    }
+  ]
+}
