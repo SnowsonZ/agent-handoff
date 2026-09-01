@@ -6,7 +6,7 @@
 | --- | --- | --- | --- |
 | GitHub | 已发布 | <https://github.com/SnowsonZ/agent-handoff> | `main` 与 `v0.1.1` 已推送 |
 | skills.sh | 已收录 | <https://www.skills.sh/snowsonz/agent-handoff/handoff-installer> | 已用公开仓库完成实际安装验证 |
-| ClawHub | 已发布，安全审计为 Pass | <https://clawhub.ai/snowsonz/skills/agent-handoff> | `0.1.1`、`latest`；市场注册表判定为 `clean`，无遗留原因码 |
+| ClawHub | 已发布，安全审计为 Review | <https://clawhub.ai/snowsonz/skills/agent-handoff/security-audit> | `0.1.1` 唯一一次审计（2026-08-31 16:19 UTC）Outcome 为 `Review`，未曾转为 `Pass`；VirusTotal 64/64 clean 只是恶意软件扫描，不等于完整审计通过。存在一条 Lp3（Medium，MCP 最小权限）待修，另一条"包不完整"发现经核实为误报（v0.1.1 产物完整） |
 | OpenAI Plugins Directory | 延期 | <https://platform.openai.com/plugins> | 用户决定暂不发布；未创建草稿、未上传 bundle、未提交审核 |
 
 ## 当前发布标识

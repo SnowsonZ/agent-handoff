@@ -20,3 +20,16 @@ license: MIT-0
 任何本地修改冲突都要停止，不得覆盖。
 
 维护安装器时读 `references/protocol.md`；排查发现或触发行为时读 `references/compatibility.md`。
+
+## 执行能力披露
+
+四种模式都通过本地 shell 执行 `scripts/install.sh`，不发起任何网络请求，只操作 `target` 指向的
+git 仓库：
+
+- `status`：只读，只运行 `git` 查询命令，不写任何文件。
+- `install` / `update` / `adopt-existing`：在 `target` 仓库内写入 `AGENTS.md`/`CLAUDE.md` 的
+  handoff 片段、`.agents/skills/handoff/SKILL.md`、`.agents/tasks/TEMPLATE.md`、
+  `tools/ledger.sh`、`.claude/skills/handoff` 符号链接；写入前逐项比对内容哈希，遇到不在
+  预期旧/新哈希范围内的本地修改会中止，不覆盖。
+
+不读取、不上传、不外发 `target` 仓库之外的任何数据。
