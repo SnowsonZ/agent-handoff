@@ -1,3 +1,10 @@
+# v0.1.3
+
+修复 ClawHub 发布产物缺失隐藏目录载荷的问题：把 bundle 内部的运行时 Skill 与任务棒模板移到
+可发布路径，同时保持目标仓库内的 `.agents/...` 安装位置不变。写模式现在会在创建 transaction 或
+目录前验证全部载荷，包不完整时直接失败且不修改目标仓库。`SKILL.md` 还通过
+`metadata.openclaw.requires` 声明了 `sh`、`git` 和 SHA-256 工具依赖。
+
 # v0.1.2
 
 在 `handoff-installer` SKILL.md 里补充了执行能力披露：明确说明四种模式都通过本地 shell 执行

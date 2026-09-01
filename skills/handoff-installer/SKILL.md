@@ -2,6 +2,15 @@
 name: handoff-installer
 description: Use when the user explicitly asks to install, update, adopt, or inspect the handoff protocol in a git repository. Do not use for starting, continuing, resuming, or handing off ordinary task work.
 license: MIT-0
+metadata:
+  openclaw:
+    requires:
+      bins:
+        - sh
+        - git
+      anyBins:
+        - shasum
+        - sha256sum
 ---
 
 # Handoff 安装器

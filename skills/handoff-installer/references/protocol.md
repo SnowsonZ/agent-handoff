@@ -5,8 +5,8 @@
 ## 单一来源
 
 - `assets/runtime/AGENTS.block.md`：仓库规则固定块
-- `assets/runtime/repo/.agents/skills/handoff/SKILL.md`：运行时 Skill
-- `assets/runtime/repo/.agents/tasks/TEMPLATE.md`：任务棒模板
+- `assets/runtime/repo/agents/skills/handoff/SKILL.md`：运行时 Skill
+- `assets/runtime/repo/agents/tasks/TEMPLATE.md`：任务棒模板
 - `scripts/ledger.sh`：只读账本脚本
 
 安装结果中的运行时 Skill、模板和账本必须是普通文件，不能保留指向安装 Skill 的链接。

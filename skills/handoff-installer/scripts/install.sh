@@ -5,8 +5,8 @@ set -eu
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 VERSION=$(tr -d '\r\n' < "$ROOT/VERSION")
 AGENTS_SOURCE=$ROOT/assets/runtime/AGENTS.block.md
-SKILL_SOURCE=$ROOT/assets/runtime/repo/.agents/skills/handoff/SKILL.md
-TEMPLATE_SOURCE=$ROOT/assets/runtime/repo/.agents/tasks/TEMPLATE.md
+SKILL_SOURCE=$ROOT/assets/runtime/repo/agents/skills/handoff/SKILL.md
+TEMPLATE_SOURCE=$ROOT/assets/runtime/repo/agents/tasks/TEMPLATE.md
 IMPORT_SOURCE=$ROOT/assets/runtime/repo/CLIENT_IMPORT
 LEDGER_SOURCE=$ROOT/scripts/ledger.sh
 BEGIN='<!-- handoff:begin -->'
@@ -36,6 +36,22 @@ LOCK=$TARGET/.agents/handoff.lock
 TRANSACTION=$TARGET/.agents/handoff.transaction
 WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT
+
+validate_payload_sources() {
+  for _source in \
+    "$ROOT/VERSION" \
+    "$AGENTS_SOURCE" \
+    "$SKILL_SOURCE" \
+    "$TEMPLATE_SOURCE" \
+    "$IMPORT_SOURCE" \
+    "$LEDGER_SOURCE"
+  do
+    if [ ! -f "$_source" ]; then
+      printf 'installer package incomplete: missing %s\n' "${_source#"$ROOT"/}" >&2
+      return 1
+    fi
+  done
+}
 
 sha256_stream() {
   if command -v shasum >/dev/null 2>&1; then
@@ -281,6 +297,10 @@ recover_transaction() {
 
 STATE=$(detect_state)
 printf 'state=%s\n' "$STATE"
+
+if [ "$MODE" != status ]; then
+  validate_payload_sources || exit 1
+fi
 
 if [ "$STATE" = interrupted ] && [ "$MODE" != status ]; then
   recover_transaction || exit 3
