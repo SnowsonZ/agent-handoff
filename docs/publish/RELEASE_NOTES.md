@@ -1,3 +1,9 @@
+# v0.1.7
+
+Skill 内容与 v0.1.4 相同。验证两处发布流程修复：恢复 annotated tag 说明作为 changelog（此前
+`actions/checkout` 会把 tag 降级成轻量 tag，changelog 静默变成提交信息）；转公开较慢时打
+warning 而不再报红，已公开则逐路径核对上传文件完整。
+
 # v0.1.6
 
 Skill 内容与 v0.1.4 相同。重新验证 tag 触发发布流程：修正发布确认逻辑——ClawHub 会给已发布版本
