@@ -26,7 +26,7 @@ env:
   VERSION_API: https://clawhub.ai/api/v1/skills/agent-handoff/versions
   # Promotion to the public version API is asynchronous on ClawHub's side and
   # has been observed to take far longer than the publish call itself.
-  CONFIRM_ATTEMPTS: 30
+  CONFIRM_ATTEMPTS: 10
   CONFIRM_INTERVAL: 30
 
 jobs:
@@ -65,6 +65,10 @@ jobs:
             printf 'manifest version %s does not match tag %s\n' "$manifest_version" "$tag" >&2
             exit 1
           }
+          # actions/checkout re-points refs/tags/<tag> at the commit sha, which
+          # degrades an annotated tag to a lightweight one and silently turns the
+          # changelog into the commit subject. Fetch the real tag object back.
+          git fetch --force origin "refs/tags/$tag:refs/tags/$tag" >/dev/null 2>&1 || true
           changelog=$(git tag -l --format='%(contents:subject)' "$tag" || true)
           [ -n "$changelog" ] || changelog="Release $version"
           printf 'VERSION=%s\n' "$version" >> "$GITHUB_ENV"
@@ -159,6 +163,9 @@ jobs:
               "$attempt" "$CONFIRM_ATTEMPTS" "$code"
             sleep "$CONFIRM_INTERVAL"
           done
-          printf 'timed out waiting for %s; check the version API and audit archive before acting\n' \
-            "$VERSION" >&2
-          exit 1
+          # Measured promotion delay: 0.1.6 took over 15 minutes and 0.1.5 over
+          # 50. Publication was already accepted above, so a slow promotion is
+          # not a release failure; say so loudly instead of going red every time.
+          printf '::warning::%s was accepted but is not public yet after %s attempts; verify later with the command in docs/publish/CLAWHUB.md\n' \
+            "$VERSION" "$CONFIRM_ATTEMPTS"
+          exit 0

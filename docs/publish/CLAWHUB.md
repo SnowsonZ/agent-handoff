@@ -41,21 +41,37 @@ git -C "$tmp/repo" push origin main "v$V"
 
 ## workflow 说明了什么
 
-绿色 = 该 tag 对应的 ClawHub 版本已公开且文件数正确。它按顺序卡四道：
+绿色 = 该 tag 对应的版本已被 ClawHub 受理，且**如果**在等待窗口内转公开，则内容完整。它按顺序卡四道：
 
 - tag、Skill `VERSION`、manifest `.version` 三者必须一致
 - dry-run 必须 `status=would-publish` 且 `fileCount=12`（**这是上传数**；已发布版本 API 会多出
   ClawHub 生成的 `skill-card.md`，两个数字口径不同，别拿 12 去比对版本 API）——ClawHub 会**静默**丢掉隐藏路径和
   符号链接，文件数是包被截断的唯一信号
 - publish 只跑一次，失败不自动重试
-- publish 后轮询版本 API 最长五分钟，版本和文件数都对才算成功
+- publish 后轮询版本 API 五分钟：转公开了就逐路径核对上传的 12 个文件一个不少（少了就红）；
+  没转公开则打一条 warning 但不报红——**转公开是 ClawHub 侧的异步过程，实测 0.1.6 用了 15 分钟以上、
+  0.1.5 超过 50 分钟**，让 CI 干等只会每次发版都变红
 
 **绿色不等于安全审计通过。** VirusTotal 与 SkillSpector 要一小时左右才回写，回写后主审计会重算，
 结论可能翻转。终态以 [STATUS.md](STATUS.md) 记录为准。
 
+## 事后确认版本真的公开了
+
+```sh
+curl -sS -L "https://clawhub.ai/api/v1/skills/agent-handoff/versions/$V" \
+  | jq -r '.version.files[].path' | sort > /tmp/published.txt
+(cd plugins/agent-handoff/skills/handoff-installer && find . -type f | sed 's|^\./||') \
+  | sort > /tmp/uploaded.txt
+comm -23 /tmp/uploaded.txt /tmp/published.txt   # 输出为空才算内容完整
+```
+
+比数量更可靠：ClawHub 会给已发布版本生成 `skill-card.md`，版本 API 的文件数恒比上传数多，
+拿 12 去比对那个接口永远不成立。
+
 ## 出岔子
 
-- **红色**：tag 已经在 GitHub 上，但 ClawHub 发布未被证明完成。先看是哪一步红的，不要直接 rerun。
+- **红色**：tag 已经在 GitHub 上，但发布未被证明完成。先看是哪一步红的，不要直接 rerun。
+- **绿色但带 warning**：已受理、尚未转公开。过一阵用下面的命令自己确认，不要重发。
 - **publish 成功但版本确认超时**：版本很可能已受理。查版本 API 和审计存档，**不要重发同一版本**。
 - **secret 失效**：更新 `CLAWHUB_TOKEN` 后，只有确认该版本尚未被受理才能重跑。
 - **修复已发布版本**：改不了，必须走新的 semver。
