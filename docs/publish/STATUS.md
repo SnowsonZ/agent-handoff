@@ -6,7 +6,7 @@
 | --- | --- | --- | --- |
 | GitHub | 已发布 | <https://github.com/SnowsonZ/agent-handoff> | `main` 与 `v0.1.4` 已推送 |
 | skills.sh | 已收录 | <https://www.skills.sh/snowsonz/agent-handoff/handoff-installer> | 已用公开仓库完成实际安装验证 |
-| ClawHub | `0.1.4` 已发布，完整异步审计待回写 | <https://clawhub.ai/snowsonz/skills/agent-handoff/security-audit> | 0.1.4 已移除 SSD-1 对应的规则豁免并增加写模式同意边界；12 个文件齐全，从 ClawHub 精确安装可成功完成且无残留 transaction。2026-09-01 08:30 UTC 初始主审计为 `clean/benign`，但 VirusTotal 与 SkillSpector 仍为空，因此当前结果只视为暂定，不记录 Pass |
+| ClawHub | `0.1.4` 已发布，完整安全审计为 Pass | <https://clawhub.ai/snowsonz/skills/agent-handoff/security-audit> | 12 个文件齐全，从 ClawHub 精确安装可成功完成且无残留 transaction。完整异步审计于 2026-09-01 08:38 UTC 回写：VirusTotal 64/64 未检出，SkillSpector 原始报告列出 5 项；主审计在同一时间重新合成并把这些能力判定为已披露、目的相符，最终为 `clean/benign`，页面 Outcome 为 `Pass` |
 | OpenAI Plugins Directory | 延期 | <https://platform.openai.com/plugins> | 用户决定暂不发布；未创建草稿、未上传 bundle、未提交审核 |
 
 ## 当前发布标识
