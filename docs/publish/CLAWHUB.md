@@ -1,0 +1,71 @@
+# ClawHub 发布
+
+**正常路径：推 tag，workflow 自动发布。** 公开仓库的
+`.github/workflows/publish-clawhub.yml` 监听 `v*.*.*` tag，自动完成版本校验、dry-run、publish
+和版本确认。不要再手工敲 publish。
+
+## 发布一个新版本
+
+```sh
+V=0.1.5
+```
+
+1. 改版本号：`.agents/skills/handoff-installer/VERSION` 与
+   `plugins/agent-handoff/.codex-plugin/plugin.json` 的 `.version` 都改成 `$V`，
+   然后 `sh tools/package-plugin.sh` 同步生成副本。
+2. 本地检查：`sh tools/verify/test-publish-readiness.sh`。它会顺带跑
+   `package-plugin.sh --check`，确认生成副本与真源同步、manifest 契约完整、发布材料齐全。
+   （`check-all.sh` 只测四家 CLI 能否读到 AGENTS.md，不校验 bundle，不能当发版闸门。）
+3. 取得用户授权后同步公开仓库并打 tag（tag message 会成为 changelog）：
+
+```sh
+tmp=$(mktemp -d)
+git clone https://github.com/SnowsonZ/agent-handoff.git "$tmp/repo"
+rsync -a --delete plugins/agent-handoff/skills/handoff-installer/ "$tmp/repo/skills/handoff-installer/"
+cp plugins/agent-handoff/.codex-plugin/plugin.json "$tmp/repo/.codex-plugin/plugin.json"
+cp plugins/agent-handoff/assets/logo.svg "$tmp/repo/assets/logo.svg"
+mkdir -p "$tmp/repo/.github/workflows"
+cp plugins/agent-handoff/.github/workflows/publish-clawhub.yml "$tmp/repo/.github/workflows/"
+cp docs/publish/PUBLIC_README.md "$tmp/repo/README.md"
+cp docs/publish/*.md docs/publish/TEST_CASES.json "$tmp/repo/docs/publish/"
+git -C "$tmp/repo" status --short          # 只应包含上述公开路径
+git -C "$tmp/repo" add -A
+git -C "$tmp/repo" commit -m "<英文单行总结>"
+git -C "$tmp/repo" tag -a "v$V" -m "<一句话变更说明>"
+git -C "$tmp/repo" push origin main "v$V"
+```
+
+> 首次把 `.github/workflows/` 推上去时，push 用的凭据需要 `workflow` 权限，否则 GitHub 会拒收。
+
+4. 去 Actions 看结果：<https://github.com/SnowsonZ/agent-handoff/actions>
+
+## workflow 说明了什么
+
+绿色 = 该 tag 对应的 ClawHub 版本已公开且文件数正确。它按顺序卡四道：
+
+- tag、Skill `VERSION`、manifest `.version` 三者必须一致
+- dry-run 必须 `status=would-publish` 且 `fileCount=12`——ClawHub 会**静默**丢掉隐藏路径和
+  符号链接，文件数是包被截断的唯一信号
+- publish 只跑一次，失败不自动重试
+- publish 后轮询版本 API 最长五分钟，版本和文件数都对才算成功
+
+**绿色不等于安全审计通过。** VirusTotal 与 SkillSpector 要一小时左右才回写，回写后主审计会重算，
+结论可能翻转。终态以 [STATUS.md](STATUS.md) 记录为准。
+
+## 出岔子
+
+- **红色**：tag 已经在 GitHub 上，但 ClawHub 发布未被证明完成。先看是哪一步红的，不要直接 rerun。
+- **publish 成功但版本确认超时**：版本很可能已受理。查版本 API 和审计存档，**不要重发同一版本**。
+- **secret 失效**：更新 `CLAWHUB_TOKEN` 后，只有确认该版本尚未被受理才能重跑。
+- **修复已发布版本**：改不了，必须走新的 semver。
+
+只有在 workflow 确实没有运行、也没有成功过的情况下，才手工发布：
+
+```sh
+npx --yes clawhub@latest skill publish ./plugins/agent-handoff/skills/handoff-installer \
+  --slug agent-handoff --name 'Handoff Installer' --version "$V" \
+  --changelog '<一句话变更说明>' --dry-run --json
+```
+
+确认 `status=would-publish`、`version=$V`、`fileCount=12` 之后，去掉 `--dry-run` 再跑一次。
+返回 `pending-publication` 表示已受理，不要重发。

@@ -2,6 +2,8 @@
 
 更新时间：2026-09-01
 
+发版步骤见 [CLAWHUB.md](CLAWHUB.md)。正常路径是往公开仓库推 `vX.Y.Z` tag，由 workflow 自动发布 ClawHub；**不要在推 tag 之后再手工执行 `clawhub skill publish`**，那会对同一版本形成第二次发布尝试。
+
 | 渠道 | 状态 | 地址 | 说明 |
 | --- | --- | --- | --- |
 | GitHub | 已发布 | <https://github.com/SnowsonZ/agent-handoff> | `main` 与 `v0.1.4` 已推送 |

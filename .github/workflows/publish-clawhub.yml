@@ -1,0 +1,137 @@
+name: Publish to ClawHub
+
+# Pushing a tag to GitHub does not update the ClawHub listing on its own.
+# This workflow is the only thing that turns a vX.Y.Z tag into a published version.
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+concurrency:
+  # Publishing is an external side effect: queue per tag, never cancel a run mid-publish.
+  group: publish-clawhub-${{ github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  SKILL_PATH: skills/handoff-installer
+  SKILL_SLUG: agent-handoff
+  SKILL_NAME: Handoff Installer
+  MANIFEST_PATH: .codex-plugin/plugin.json
+  # ClawHub silently drops hidden paths and symlinks from a published bundle.
+  # A wrong file count is the only signal that the payload was truncated.
+  EXPECTED_FILE_COUNT: 12
+  VERSION_API: https://clawhub.ai/api/v1/skills/agent-handoff/versions
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the tag
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Require agreement between tag, skill and manifest
+        run: |
+          set -eu
+          tag=$GITHUB_REF_NAME
+          printf '%s' "$tag" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$' || {
+            printf 'tag %s is not vX.Y.Z\n' "$tag" >&2
+            exit 1
+          }
+          version=${tag#v}
+          skill_version=$(tr -d '\r\n' < "$SKILL_PATH/VERSION")
+          manifest_version=$(jq -r '.version' "$MANIFEST_PATH")
+          [ "$skill_version" = "$version" ] || {
+            printf 'skill VERSION %s does not match tag %s\n' "$skill_version" "$tag" >&2
+            exit 1
+          }
+          [ "$manifest_version" = "$version" ] || {
+            printf 'manifest version %s does not match tag %s\n' "$manifest_version" "$tag" >&2
+            exit 1
+          }
+          changelog=$(git tag -l --format='%(contents:subject)' "$tag" || true)
+          [ -n "$changelog" ] || changelog="Release $version"
+          printf 'VERSION=%s\n' "$version" >> "$GITHUB_ENV"
+          printf 'CHANGELOG=%s\n' "$changelog" >> "$GITHUB_ENV"
+
+      - name: Log in to ClawHub
+        env:
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
+        run: |
+          set -eu
+          [ -n "${CLAWHUB_TOKEN:-}" ] || {
+            printf 'CLAWHUB_TOKEN secret is not configured\n' >&2
+            exit 1
+          }
+          npx --yes clawhub@latest login --token "$CLAWHUB_TOKEN" >/dev/null
+          npx --yes clawhub@latest whoami
+
+      - name: Dry-run gate
+        run: |
+          set -eu
+          npx --yes clawhub@latest skill publish "$SKILL_PATH" \
+            --slug "$SKILL_SLUG" --name "$SKILL_NAME" \
+            --version "$VERSION" --changelog "$CHANGELOG" \
+            --dry-run --json > dry-run.json || {
+            # Keep the CLI's JSON body in the log: it carries the server
+            # message and attempt id needed to decide what to do next.
+            cat dry-run.json
+            exit 1
+          }
+          cat dry-run.json
+          jq -e --arg v "$VERSION" --argjson n "$EXPECTED_FILE_COUNT" \
+            '.status == "would-publish" and .version == $v and .fileCount == $n' \
+            dry-run.json > /dev/null || {
+            printf 'dry-run did not report would-publish for %s with %s files\n' \
+              "$VERSION" "$EXPECTED_FILE_COUNT" >&2
+            exit 1
+          }
+
+      - name: Publish
+        run: |
+          set -eu
+          # Run exactly once. A retry here would create a second attempt for a
+          # version the registry may already have accepted.
+          npx --yes clawhub@latest skill publish "$SKILL_PATH" \
+            --slug "$SKILL_SLUG" --name "$SKILL_NAME" \
+            --version "$VERSION" --changelog "$CHANGELOG" \
+            --json > publish.json || {
+            # Keep the CLI's JSON body in the log: it carries the server
+            # message and attempt id needed to decide what to do next.
+            cat publish.json
+            exit 1
+          }
+          cat publish.json
+          jq -e '.status == "pending-publication" or .status == "published"' \
+            publish.json > /dev/null || {
+            printf 'publish returned an unrecognised status; check publish.json before retrying\n' >&2
+            exit 1
+          }
+
+      - name: Confirm the exact version is public
+        run: |
+          set -eu
+          # pending-publication means accepted, not live. Wait for the version API
+          # instead of publishing again.
+          attempt=0
+          while [ "$attempt" -lt 20 ]; do
+            if curl -sS -L "$VERSION_API/$VERSION" > version.json 2>/dev/null &&
+               jq -e --arg v "$VERSION" --argjson n "$EXPECTED_FILE_COUNT" \
+                 '.version.version == $v and (.version.files | length) == $n' \
+                 version.json > /dev/null; then
+              printf '%s is public with %s files\n' "$VERSION" "$EXPECTED_FILE_COUNT"
+              exit 0
+            fi
+            attempt=$((attempt + 1))
+            sleep 15
+          done
+          printf 'timed out waiting for %s; check the version API and audit archive before acting\n' \
+            "$VERSION" >&2
+          exit 1
