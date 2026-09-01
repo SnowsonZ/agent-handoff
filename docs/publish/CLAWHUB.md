@@ -44,7 +44,8 @@ git -C "$tmp/repo" push origin main "v$V"
 绿色 = 该 tag 对应的 ClawHub 版本已公开且文件数正确。它按顺序卡四道：
 
 - tag、Skill `VERSION`、manifest `.version` 三者必须一致
-- dry-run 必须 `status=would-publish` 且 `fileCount=12`——ClawHub 会**静默**丢掉隐藏路径和
+- dry-run 必须 `status=would-publish` 且 `fileCount=12`（**这是上传数**；已发布版本 API 会多出
+  ClawHub 生成的 `skill-card.md`，两个数字口径不同，别拿 12 去比对版本 API）——ClawHub 会**静默**丢掉隐藏路径和
   符号链接，文件数是包被截断的唯一信号
 - publish 只跑一次，失败不自动重试
 - publish 后轮询版本 API 最长五分钟，版本和文件数都对才算成功

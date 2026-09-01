@@ -24,6 +24,10 @@ env:
   # A wrong file count is the only signal that the payload was truncated.
   EXPECTED_FILE_COUNT: 12
   VERSION_API: https://clawhub.ai/api/v1/skills/agent-handoff/versions
+  # Promotion to the public version API is asynchronous on ClawHub's side and
+  # has been observed to take far longer than the publish call itself.
+  CONFIRM_ATTEMPTS: 30
+  CONFIRM_INTERVAL: 30
 
 jobs:
   publish:
@@ -31,6 +35,11 @@ jobs:
     steps:
       - name: Check out the tag
         uses: actions/checkout@v4
+        with:
+          # Without these the annotated tag object is not fetched and the
+          # changelog silently falls back to "Release <version>".
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -121,16 +130,34 @@ jobs:
           # pending-publication means accepted, not live. Wait for the version API
           # instead of publishing again.
           attempt=0
-          while [ "$attempt" -lt 20 ]; do
-            if curl -sS -L "$VERSION_API/$VERSION" > version.json 2>/dev/null &&
-               jq -e --arg v "$VERSION" --argjson n "$EXPECTED_FILE_COUNT" \
-                 '.version.version == $v and (.version.files | length) == $n' \
-                 version.json > /dev/null; then
-              printf '%s is public with %s files\n' "$VERSION" "$EXPECTED_FILE_COUNT"
-              exit 0
-            fi
+          while [ "$attempt" -lt "$CONFIRM_ATTEMPTS" ]; do
             attempt=$((attempt + 1))
-            sleep 15
+            code=$(curl -sS -L -o version.json -w '%{http_code}' \
+              "$VERSION_API/$VERSION" 2>/dev/null || echo 000)
+            if [ "$code" = 200 ] &&
+               jq -e --arg v "$VERSION" '.version.version == $v' \
+                 version.json > /dev/null 2>&1; then
+              # ClawHub adds generated files (skill-card.md) to a published
+              # version, so its file count is larger than what we uploaded.
+              # Compare paths instead: every uploaded path must be present.
+              jq -r '.version.files[].path' version.json | sort > published.txt
+              ( cd "$SKILL_PATH" && find . -type f | sed 's|^\./||' ) \
+                | sort > uploaded.txt
+              missing=$(comm -23 uploaded.txt published.txt)
+              if [ -z "$missing" ]; then
+                printf '%s is public with all %s uploaded files\n' \
+                  "$VERSION" "$EXPECTED_FILE_COUNT"
+                exit 0
+              fi
+              printf 'published %s is missing uploaded files:\n%s\n' \
+                "$VERSION" "$missing" >&2
+              exit 1
+            fi
+            # A version that is accepted but not yet promoted answers 404 with a
+            # plain-text body; report the code instead of letting jq choke on it.
+            printf 'attempt %s/%s: not public yet (HTTP %s)\n' \
+              "$attempt" "$CONFIRM_ATTEMPTS" "$code"
+            sleep "$CONFIRM_INTERVAL"
           done
           printf 'timed out waiting for %s; check the version API and audit archive before acting\n' \
             "$VERSION" >&2
