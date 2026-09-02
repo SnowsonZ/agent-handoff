@@ -20,7 +20,7 @@ V=0.1.5
 
 ```sh
 tmp=$(mktemp -d)
-git clone https://github.com/SnowsonZ/agent-handoff-skill.git "$tmp/repo"
+git clone ssh://git@ssh.github.com:443/SnowsonZ/agent-handoff-skill.git "$tmp/repo"
 rsync -a --delete plugins/agent-handoff/skills/handoff-installer/ "$tmp/repo/skills/handoff-installer/"
 cp plugins/agent-handoff/.codex-plugin/plugin.json "$tmp/repo/.codex-plugin/plugin.json"
 cp plugins/agent-handoff/assets/logo.svg "$tmp/repo/assets/logo.svg"
@@ -35,7 +35,14 @@ git -C "$tmp/repo" tag -a "v$V" -m "<一句话变更说明>"
 git -C "$tmp/repo" push origin main "v$V"
 ```
 
-> 首次把 `.github/workflows/` 推上去时，push 用的凭据需要 `workflow` 权限，否则 GitHub 会拒收。
+> **推送前先看这两条**（本机实测）：
+>
+> - 到 `github.com` 的 **22 端口被封**，SSH 直连会卡在 `kex_exchange_identification`。改用
+>   `ssh://git@ssh.github.com:443/SnowsonZ/agent-handoff-skill.git` 克隆与推送。偶发
+>   `SSL_ERROR_SYSCALL` / `Connection closed` 是瞬时抖动，重试即可。
+> - 改动 `.github/workflows/` 时，走 HTTPS 推送需要凭据带 `workflow` scope，否则 GitHub 拒收；
+>   当前 `gh` token 只有 `repo, gist, read:org, admin:public_key`，**没有** `workflow`。走上面的
+>   SSH-over-443 不受此限制。只改 skill 与文档、不动 workflow 文件时，HTTPS 也可以。
 
 4. 去 Actions 看结果：<https://github.com/SnowsonZ/agent-handoff-skill/actions>
 
@@ -52,8 +59,23 @@ git -C "$tmp/repo" push origin main "v$V"
   没转公开则打一条 warning 但不报红——**转公开是 ClawHub 侧的异步过程，实测 0.1.6 用了 15 分钟以上、
   0.1.5 超过 50 分钟**，让 CI 干等只会每次发版都变红
 
-**绿色不等于安全审计通过。** VirusTotal 与 SkillSpector 要一小时左右才回写，回写后主审计会重算，
-结论可能翻转。终态以 [STATUS.md](STATUS.md) 记录为准。
+**绿色不等于安全审计通过。** VirusTotal 与 SkillSpector 是异步的，回写后主审计会重新合成，结论
+可能翻转（0.1.3 就从 Pass 翻成过 Review）。**满足以下三条才算终态**，此前看到的任何结论都要标为暂定：
+
+```sh
+npx --yes clawhub@latest scan download agent-handoff-skill --version "$V" --output /tmp/scan.zip
+for f in virustotal skillspector clawscan; do
+  printf '%-14s %s\n' "$f" "$(unzip -p /tmp/scan.zip $f.json | jq -r 'if .==null then "null" else (.checkedAt|tostring) end')"
+done
+```
+
+1. `virustotal` 非 null
+2. `skillspector` 非 null
+3. `clawscan.checkedAt` **不早于**上面两者——证明主审计已用支持扫描重新合成
+
+判定整改是否奏效要看 `clawscan.dimensions[].rating` 与 `.detail` 的措辞，不要只看顶层 `verdict`：
+同一份产物（仅 VERSION 不同）曾分别得到 `benign` 与 `suspicious`，SkillSpector 也出现过
+0/2/2/5 个 HIGH 的波动。终态结论以 [STATUS.md](STATUS.md) 记录为准。
 
 ## 事后确认版本真的公开了
 
