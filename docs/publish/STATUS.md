@@ -8,7 +8,7 @@
 | --- | --- | --- | --- |
 | GitHub | 已发布 | <https://github.com/SnowsonZ/agent-handoff> | `main` 与 `v0.1.8` 已推送；tag 触发的 ClawHub 发布 workflow 已在 `v0.1.7`、`v0.1.8` 连续两次全绿 |
 | skills.sh | 已收录 | <https://www.skills.sh/snowsonz/agent-handoff/handoff-installer> | 已用公开仓库完成实际安装验证 |
-| ClawHub | `0.1.8` 已发布，**完整异步审计待回写** | <https://clawhub.ai/snowsonz/skills/agent-handoff/security-audit> | 上传的 12 个路径经 workflow 逐路径核对齐全。0.1.8 针对 0.1.7 审计意见做了实质整改：抢救路径需用户同意后才读会话历史、整理结果需过目后才写入。终态需等 VirusTotal 与 SkillSpector 回写、且主审计在二者之后重新合成才可判定，此前显示的任何结论均为暂定。参考：0.1.7 主审计为 `suspicious`（页面 Review），0.1.6 同内容为 `benign`，同一产物两种结论 |
+| ClawHub | `0.1.8` 已发布，当前主审计 `benign`（**VirusTotal 未回写，终态待定**） | <https://clawhub.ai/snowsonz/skills/agent-handoff/security-audit> | 12 个上传路径经 workflow 逐路径核对齐全。0.1.8 针对 0.1.7 的意见整改后，主审计 summary 明确写为「sensitive future behavior called out and gated by user confirmation」，0.1.7 的四条 concern 全部消失（3 ok / 2 note），且无任何维度再提会话历史抢救路径；SkillSpector 4 项（2 HIGH 2 MEDIUM），HIGH 两条为长期存在的运行时作用域宽度问题，主审计历来判为已披露且与用途相符。终态须待 VirusTotal 回写、主审计在其之后重新合成才可判定——0.1.3 即曾先显示 Pass、VT 回写后翻为 Review |
 | OpenAI Plugins Directory | 延期 | <https://platform.openai.com/plugins> | 用户决定暂不发布；未创建草稿、未上传 bundle、未提交审核 |
 
 ## 当前发布标识
