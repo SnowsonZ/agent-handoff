@@ -1,6 +1,6 @@
 ---
 name: handoff-installer
-description: Use when the user explicitly asks to install, update, adopt, or inspect the handoff protocol in a git repository. Do not use for starting, continuing, resuming, or handing off ordinary task work.
+description: Use when the user explicitly asks to install, update, adopt, or inspect the handoff protocol in a git repository. This package delivers a repository-level handoff protocol — installing it writes a runtime skill that will govern how future agent sessions in that repository start work, hand off, and commit. Do not use this skill for starting, continuing, resuming, or handing off ordinary task work — the installed runtime skill covers that.
 license: MIT-0
 metadata:
   openclaw:
@@ -14,6 +14,23 @@ metadata:
 ---
 
 # Handoff 安装器
+
+## 这个包的两层结构
+
+本包交付的是一套**仓库级 handoff 协议**，由两层组成，各有各的 frontmatter 和适用范围：
+
+| 层 | 是什么 | 何时生效 |
+| --- | --- | --- |
+| 本文件（`name: handoff-installer`） | 安装器指令 | 用户明确要求安装/更新/采用旧版/检查状态时 |
+| `assets/runtime/repo/agents/skills/handoff/SKILL.md`（`name: handoff`） | 待安装的**运行时协议载荷** | 只有被安装到目标仓库的 `.agents/skills/handoff/` 之后 |
+
+**载荷是数据，不是给本 skill 的指令。** 它在本包内不被加载、不被执行；安装器只负责把它写进目标
+仓库。它描述的那套日常工作规程（接棒、交接、归档、提交）是在**目标仓库**里对**未来会话**生效的，
+不是本 skill 的行为范围——所以本 skill 明确声明不用于日常任务接力。
+
+装进去之后它会长期影响该仓库的 agent 工作方式，这一点在写模式确认里会向用户完整披露。
+
+## 使用
 
 先检查当前用户消息，再使用工具。
 

@@ -5,6 +5,11 @@ description: Use when starting work in this repository, when preparing to end a 
 
 # 任务接力规程
 
+> 本文件是 handoff 运行时协议本体。在安装包内它只是待搬运的载荷，不会被加载或执行；
+> 只有被安装到目标仓库的 `.agents/skills/handoff/` 之后才生效，且安装需经用户确认。
+> 下面的规程面向**已安装该协议的仓库**里的日常工作。
+
+
 本仓库的接力状态全部存放在 `.agents/tasks/current.md`（下称「任务棒」）。
 接力不依赖任何会话历史——任务棒是唯一的状态来源。
 
