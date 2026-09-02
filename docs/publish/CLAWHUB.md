@@ -20,7 +20,7 @@ V=0.1.5
 
 ```sh
 tmp=$(mktemp -d)
-git clone https://github.com/SnowsonZ/agent-handoff.git "$tmp/repo"
+git clone https://github.com/SnowsonZ/agent-handoff-skill.git "$tmp/repo"
 rsync -a --delete plugins/agent-handoff/skills/handoff-installer/ "$tmp/repo/skills/handoff-installer/"
 cp plugins/agent-handoff/.codex-plugin/plugin.json "$tmp/repo/.codex-plugin/plugin.json"
 cp plugins/agent-handoff/assets/logo.svg "$tmp/repo/assets/logo.svg"
@@ -37,7 +37,7 @@ git -C "$tmp/repo" push origin main "v$V"
 
 > 首次把 `.github/workflows/` 推上去时，push 用的凭据需要 `workflow` 权限，否则 GitHub 会拒收。
 
-4. 去 Actions 看结果：<https://github.com/SnowsonZ/agent-handoff/actions>
+4. 去 Actions 看结果：<https://github.com/SnowsonZ/agent-handoff-skill/actions>
 
 ## workflow 说明了什么
 
@@ -58,7 +58,7 @@ git -C "$tmp/repo" push origin main "v$V"
 ## 事后确认版本真的公开了
 
 ```sh
-curl -sS -L "https://clawhub.ai/api/v1/skills/agent-handoff/versions/$V" \
+curl -sS -L "https://clawhub.ai/api/v1/skills/agent-handoff-skill/versions/$V" \
   | jq -r '.version.files[].path' | sort > /tmp/published.txt
 (cd plugins/agent-handoff/skills/handoff-installer && find . -type f | sed 's|^\./||') \
   | sort > /tmp/uploaded.txt
@@ -80,7 +80,7 @@ comm -23 /tmp/uploaded.txt /tmp/published.txt   # 输出为空才算内容完整
 
 ```sh
 npx --yes clawhub@latest skill publish ./plugins/agent-handoff/skills/handoff-installer \
-  --slug agent-handoff --name 'Handoff Installer' --version "$V" \
+  --slug agent-handoff-skill --name 'Handoff Installer' --version "$V" \
   --changelog '<一句话变更说明>' --dry-run --json
 ```
 

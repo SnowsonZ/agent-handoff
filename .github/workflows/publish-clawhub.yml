@@ -17,13 +17,13 @@ concurrency:
 
 env:
   SKILL_PATH: skills/handoff-installer
-  SKILL_SLUG: agent-handoff
+  SKILL_SLUG: agent-handoff-skill
   SKILL_NAME: Handoff Installer
   MANIFEST_PATH: .codex-plugin/plugin.json
   # ClawHub silently drops hidden paths and symlinks from a published bundle.
   # A wrong file count is the only signal that the payload was truncated.
   EXPECTED_FILE_COUNT: 12
-  VERSION_API: https://clawhub.ai/api/v1/skills/agent-handoff/versions
+  VERSION_API: https://clawhub.ai/api/v1/skills/agent-handoff-skill/versions
   # Promotion to the public version API is asynchronous on ClawHub's side and
   # has been observed to take far longer than the publish call itself.
   CONFIRM_ATTEMPTS: 10

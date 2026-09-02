@@ -1,5 +1,5 @@
 {
-  "name": "agent-handoff",
+  "name": "agent-handoff-skill",
   "version": "0.1.8",
   "description": "Install and update a repository-local handoff protocol for auditable multi-agent task relay.",
   "author": {
@@ -7,8 +7,8 @@
     "email": "snowsonz@outlook.com",
     "url": "https://github.com/SnowsonZ"
   },
-  "homepage": "https://github.com/SnowsonZ/agent-handoff",
-  "repository": "https://github.com/SnowsonZ/agent-handoff",
+  "homepage": "https://github.com/SnowsonZ/agent-handoff-skill",
+  "repository": "https://github.com/SnowsonZ/agent-handoff-skill",
   "license": "MIT-0",
   "keywords": [
     "handoff",
@@ -25,9 +25,9 @@
     "capabilities": [
       "Write"
     ],
-    "websiteURL": "https://github.com/SnowsonZ/agent-handoff",
-    "privacyPolicyURL": "https://github.com/SnowsonZ/agent-handoff/blob/main/docs/publish/PRIVACY.md",
-    "termsOfServiceURL": "https://github.com/SnowsonZ/agent-handoff/blob/main/docs/publish/TERMS.md",
+    "websiteURL": "https://github.com/SnowsonZ/agent-handoff-skill",
+    "privacyPolicyURL": "https://github.com/SnowsonZ/agent-handoff-skill/blob/main/docs/publish/PRIVACY.md",
+    "termsOfServiceURL": "https://github.com/SnowsonZ/agent-handoff-skill/blob/main/docs/publish/TERMS.md",
     "defaultPrompt": [
       "Install handoff in this git repository.",
       "Check the handoff installation status.",
