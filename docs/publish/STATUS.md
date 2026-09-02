@@ -6,9 +6,9 @@
 
 | 渠道 | 状态 | 地址 | 说明 |
 | --- | --- | --- | --- |
-| GitHub | 已发布 | <https://github.com/SnowsonZ/agent-handoff-skill> | `main` 与 `v0.1.9` 已推送；tag 触发的 ClawHub 发布 workflow 已在 `v0.1.7`、`v0.1.8`、`v0.1.9` 连续三次全绿。2026-09-02 仓库由 `agent-handoff` 改名为 `agent-handoff-skill`（`gh repo rename`，旧名自动重定向） |
+| GitHub | 已发布 | <https://github.com/SnowsonZ/agent-handoff-skill> | `main` 与 `v0.1.10` 已推送；tag 触发的 ClawHub 发布 workflow 已在 `v0.1.7`—`v0.1.10` 连续四次全绿 |
 | skills.sh | 已收录 | <https://www.skills.sh/snowsonz/agent-handoff-skill/handoff-installer> | 已用公开仓库完成实际安装验证；地址随 2026-09-02 GitHub 仓库改名一并变化 |
-| ClawHub | `0.1.9` 已发布，**完整异步审计终态为 `benign`（页面 Pass）** | <https://clawhub.ai/snowsonz/skills/agent-handoff-skill/security-audit> | 12 个上传路径经 workflow 逐路径核对齐全，5 个步骤全绿（含转公开确认，未走 warning 分支）。终态判据已满足：VirusTotal 回写（64 引擎，0 恶意 0 可疑），SkillSpector 与主审计同刻且晚于 VirusTotal，主审计已用支持扫描重新合成，`benign`/confidence high，维度 3 ok / 2 note 无 concern。主审计 `persistence_privilege` 明确记录「recovery path may read session history only after explicit user consent」，即 0.1.8 的同意门整改已被认可。需注意：SkillSpector 原始报告为 5 项全 HIGH（较 0.1.8 的 4 项 2 HIGH 更重），5 条均指向运行时协议作用域宽（元数据与正文范围不一致、指导日常仓库工作、改写任务棒、归档提交、建棒与抢救流程），主审计历来判为已披露且与用途相符。2026-09-02 slug 由 `agent-handoff` 改名为 `agent-handoff-skill`，8 个历史版本与审计记录原样保留，旧 slug 重定向 |
+| ClawHub | `0.1.10` 已发布，**完整异步审计终态为 `benign`（页面 Pass）** | <https://clawhub.ai/snowsonz/skills/agent-handoff-skill/security-audit> | 终态判据满足：VirusTotal 回写（59 引擎，0 恶意 0 可疑），SkillSpector 与主审计同刻且晚于 VirusTotal。主审计 `benign`/confidence high，维度 3 ok / 2 note 无 concern。**0.1.10 的两层结构声明生效**：SkillSpector 由 0.1.9 的 5 项全 HIGH 降为 2 项全 MEDIUM，0.1.9 那五条「元数据自称安装器、正文却是工作流」的判定全部消失；剩余 2 条为运行时协议激活文案偏宽、正文全中文无语言选择机制，均属真实设计属性而非名实不符。注意该扫描器在近乎相同内容上出现过 0/2/2/5 个 HIGH 的波动，单次结果不足以独立证明因果，此处结论依据的是消失的恰是被改动针对的那一族判定 |
 | OpenAI Plugins Directory | 延期 | <https://platform.openai.com/plugins> | 用户决定暂不发布；未创建草稿、未上传 bundle、未提交审核 |
 
 ## 当前发布标识
@@ -16,5 +16,5 @@
 - 公开 Plugin、GitHub 仓库和市场 slug：`agent-handoff-skill`
 - 安装 Skill：`handoff-installer`
 - 安装到目标仓库后的运行时 Skill：`handoff`
-- 公开版本：`0.1.9`
+- 公开版本：`0.1.10`
 - 许可证：MIT-0
